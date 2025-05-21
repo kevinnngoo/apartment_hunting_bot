@@ -1,0 +1,4 @@
+scraper.log
+data/
+.env
+*.csv
