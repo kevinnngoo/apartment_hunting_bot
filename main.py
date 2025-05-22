@@ -31,6 +31,8 @@ driver = webdriver.Chrome(options=options)
 
 # Store filtered listings
 results = []
+visited_links = set()
+
 
 try:
     # Step 1: Open the search results page
@@ -44,6 +46,9 @@ try:
 
         # Step 3: Visit each property and extract data
         for link in property_links:
+            if link in visited_links:
+                continue
+            visited_links.add(link)
             driver.get(link)
             time.sleep(random.uniform(2, 4))  # Avoid bot detection
 
@@ -100,7 +105,7 @@ finally:
     # Step 7: Send email notification if results found
     if len(results) > 0:
         subject = "Boston Apartment Bot: New Listings Found"
-        body = f"{len(results)} new listings found. See your CSV for details."
+        body = f"{len(results)} new listings found. See attached CSV for details."
         try:
             send_email(
                 subject=subject,
@@ -110,8 +115,10 @@ finally:
                 smtp_server=SMTP_SERVER,
                 smtp_port=SMTP_PORT,
                 smtp_user=SMTP_USER,
-                smtp_pass=SMTP_PASS
+                smtp_pass=SMTP_PASS,
+                attachment_path="data/boston_apartments.csv"
             )
             print("✅ Email notification sent!")
         except Exception as e:
             print(f"❌ Failed to send email: {e}")
+
